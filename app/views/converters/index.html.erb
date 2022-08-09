@@ -1,0 +1,19 @@
+<div class='w-screen'>
+  <div class='w-screen'>
+    <%= form_with model: @course, url: '/convert', method: :post do |f| %>
+      <%= f.text_field :name %>
+      <%= f.file_field :converter_json %>
+      <%= f.submit 'Convert' %>
+    <% end %>
+  </div>
+
+  <div class='w-screen'>
+    <% @courses.each do |course| %>
+      <li>
+        <%= course.id %>
+        <%= course.name %>
+        <%= link_to 'Download', download_path(course) %>
+      </li>
+    <% end %>
+  </div>
+</div>
