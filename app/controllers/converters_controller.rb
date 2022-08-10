@@ -18,31 +18,37 @@ class ConvertersController < ApplicationController
 
     csv_data = CSV.generate(headers: true) do |csv|
       csv << headers
-      csv << ["#{json['title']}", "Course type: #{json['course_type']}", "#{json['attachments'].count}", "", "", ""]
+      csv << ["TITLE: #{json['title']}", "Course type: #{json['course_type']}", "#{json['attachments'].count}", "", "", ""]
       binding.pry
       json['ordered_slides'].each do |slide|
         p_attr = slide['published_attributes']
         structured_body = p_attr['structured_body']
-        csv << ["#{p_attr['title']}", "#{p_attr['type']}", "", "", "",  "#{p_attr['serialized_body']}"
+        csv << ["TITLE: #{p_attr['title']}", "#{p_attr['type']}", "", "", "",  "#{p_attr['serialized_body']}"
         ]
 
         if structured_body
           csv << ["--- DETAILS ---", "", "", "", "", "",]
 
-          csv << ["TEXT", "TYPE", "", "", "", "",]
+          if structured_body['blocks'].present?
+            csv << ["TEXT", "TYPE", "", "", "", "",]
 
-          structured_body['blocks'].each do |block|
-            csv << ["#{block['text']}", "#{block['type']}", "", "", "", ""]
+            structured_body['blocks'].each do |block|
+              csv << ["#{block['text']}", "#{block['type']}", "", "", "", ""]
+            end
           end
 
-          csv << ["SRC", "TYPE", "DATA", "", "", "",]
+          if structured_body['entityMap'].present?
+            binding.pry
+            csv << ["SOURCE TYPE", "SRC", "", "", "", "",]
+          
+            structured_body['entityMap'].each do |entityMap|
+              csv << [ "#{entityMap.second['type']}", "#{entityMap.second['type'] === 'image' ? entityMap.second['data']['src'] : entityMap.second['data']['href'] }", "", "", "", ""]
+            end
+          end
 
-          structured_body['entityMap'].each do |entityMap|
-            # csv << ["#{entityMap['src']}", "#{entityMap['type']}", "#{entityMap['data']}", "", "", ""]
-          end          
+          csv << ["--- END OF DETAILS ---", "", "", "", "", "",]
+          csv << ["", "", "", "", "", "",]
         end
-
-        csv << ["--- END OF DETAILS ---", "", "", "", "", "",]
       end
     end
 
