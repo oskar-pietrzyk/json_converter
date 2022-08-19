@@ -19,7 +19,6 @@ class ConvertersController < ApplicationController
     csv_data = CSV.generate(headers: true) do |csv|
       csv << headers
       csv << ["TITLE: #{json['title']}", "Course type: #{json['course_type']}", "#{json['attachments'].count}", "", "", ""]
-      binding.pry
       json['ordered_slides'].each do |slide|
         p_attr = slide['published_attributes']
         structured_body = p_attr['structured_body']
@@ -38,11 +37,10 @@ class ConvertersController < ApplicationController
           end
 
           if structured_body['entityMap'].present?
-            binding.pry
             csv << ["SOURCE TYPE", "SRC", "", "", "", "",]
           
             structured_body['entityMap'].each do |entityMap|
-              csv << [ "#{entityMap.second['type']}", "#{entityMap.second['type'] === 'image' ? entityMap.second['data']['src'] : entityMap.second['data']['href'] }", "", "", "", ""]
+              csv << [ "#{entityMap.second['type']}", "#{entityMap.second['type'] === 'image' ? entityMap.second['data']['src'] : entityMap.second['data']['href'] }", "#{entityMap.second['data']}", "", "", ""]
             end
           end
 
@@ -52,7 +50,7 @@ class ConvertersController < ApplicationController
       end
     end
 
-    send_data csv_data, :type => 'text/csv', filename: "data-#{Date.today.to_s}.csv", disposition: 'attachment'
+    send_data csv_data, :type => 'text/csv', filename: "#{json['title']}.csv", disposition: 'attachment'
   end
 end
 
